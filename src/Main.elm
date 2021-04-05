@@ -22,7 +22,23 @@ productListDecoder : Decoder (List Product)
 productListDecoder =
     list productDecoder
 
-
+errorToString : Http.Error -> String
+errorToString error =
+    case error of
+        Http.BadUrl url ->
+            "The URL " ++ url ++ " was invalid"
+        Http.Timeout ->
+            "Unable to reach the server, try again"
+        Http.NetworkError ->
+            "Unable to reach the server, check your network connection"
+        Http.BadStatus 500 ->
+            "The server had a problem, try again later"
+        Http.BadStatus 400 ->
+            "Verify your information and try again"
+        Http.BadStatus _ ->
+            "Unknown error"
+        Http.BadBody errorMessage ->
+            errorMessage
 
 -- MAIN
 
@@ -41,7 +57,7 @@ main =
 
 
 type Model
-  = Fail
+  = Fail Http.Error
   | Load
   | Succ (List Product)
 
@@ -72,8 +88,8 @@ update msg _ =
         Ok products ->
           (Succ products, Cmd.none)
 
-        Err _ ->
-          (Fail, Cmd.none)
+        Err err ->
+          (Fail err, Cmd.none)
 
 
 
@@ -92,8 +108,8 @@ subscriptions _ =
 view : Model -> Html Msg
 view model =
   case model of
-    Fail ->
-      text "I was unable to load cart"
+    Fail err ->
+      text (errorToString err)
 
     Load ->
       text "Loading..."

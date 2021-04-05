@@ -6155,7 +6155,9 @@ var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $author$project$Main$subscriptions = function (_v0) {
 	return $elm$core$Platform$Sub$none;
 };
-var $author$project$Main$Fail = {$: 'Fail'};
+var $author$project$Main$Fail = function (a) {
+	return {$: 'Fail', a: a};
+};
 var $author$project$Main$Succ = function (a) {
 	return {$: 'Succ', a: a};
 };
@@ -6170,7 +6172,10 @@ var $author$project$Main$update = F2(
 				$author$project$Main$Succ(products),
 				$elm$core$Platform$Cmd$none);
 		} else {
-			return _Utils_Tuple2($author$project$Main$Fail, $elm$core$Platform$Cmd$none);
+			var err = result.a;
+			return _Utils_Tuple2(
+				$author$project$Main$Fail(err),
+				$elm$core$Platform$Cmd$none);
 		}
 	});
 var $elm$html$Html$li = _VirtualDom_node('li');
@@ -6185,11 +6190,36 @@ var $author$project$Main$elementProduct = function (product) {
 				$elm$html$Html$text(product.name)
 			]));
 };
+var $author$project$Main$errorToString = function (error) {
+	switch (error.$) {
+		case 'BadUrl':
+			var url = error.a;
+			return 'The URL ' + (url + ' was invalid');
+		case 'Timeout':
+			return 'Unable to reach the server, try again';
+		case 'NetworkError':
+			return 'Unable to reach the server, check your network connection';
+		case 'BadStatus':
+			switch (error.a) {
+				case 500:
+					return 'The server had a problem, try again later';
+				case 400:
+					return 'Verify your information and try again';
+				default:
+					return 'Unknown error';
+			}
+		default:
+			var errorMessage = error.a;
+			return errorMessage;
+	}
+};
 var $elm$html$Html$ul = _VirtualDom_node('ul');
 var $author$project$Main$view = function (model) {
 	switch (model.$) {
 		case 'Fail':
-			return $elm$html$Html$text('I was unable to load cart');
+			var err = model.a;
+			return $elm$html$Html$text(
+				$author$project$Main$errorToString(err));
 		case 'Load':
 			return $elm$html$Html$text('Loading...');
 		default:
