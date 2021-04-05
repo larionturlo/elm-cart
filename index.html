@@ -5337,6 +5337,7 @@ var $author$project$Main$GotRes = function (a) {
 	return {$: 'GotRes', a: a};
 };
 var $author$project$Main$Load = {$: 'Load'};
+var $elm$json$Json$Decode$decodeString = _Json_runOnString;
 var $elm$http$Http$BadStatus_ = F2(
 	function (a, b) {
 		return {$: 'BadStatus_', a: a, b: b};
@@ -5879,8 +5880,6 @@ var $elm$core$Dict$update = F3(
 			return A2($elm$core$Dict$remove, targetKey, dictionary);
 		}
 	});
-var $elm$http$Http$emptyBody = _Http_emptyBody;
-var $elm$json$Json$Decode$decodeString = _Json_runOnString;
 var $elm$core$Basics$composeR = F3(
 	function (f, g, x) {
 		return g(
@@ -5952,28 +5951,7 @@ var $elm$http$Http$expectJson = F2(
 						A2($elm$json$Json$Decode$decodeString, decoder, string));
 				}));
 	});
-var $elm$http$Http$Header = F2(
-	function (a, b) {
-		return {$: 'Header', a: a, b: b};
-	});
-var $elm$http$Http$header = $elm$http$Http$Header;
-var $elm$json$Json$Decode$list = _Json_decodeList;
-var $author$project$Main$Product = F3(
-	function (name, price, quantity) {
-		return {name: name, price: price, quantity: quantity};
-	});
-var $elm$json$Json$Decode$field = _Json_decodeField;
-var $elm$json$Json$Decode$float = _Json_decodeFloat;
-var $elm$json$Json$Decode$int = _Json_decodeInt;
-var $elm$json$Json$Decode$map3 = _Json_map3;
-var $elm$json$Json$Decode$string = _Json_decodeString;
-var $author$project$Main$productDecoder = A4(
-	$elm$json$Json$Decode$map3,
-	$author$project$Main$Product,
-	A2($elm$json$Json$Decode$field, 'name', $elm$json$Json$Decode$string),
-	A2($elm$json$Json$Decode$field, 'price', $elm$json$Json$Decode$float),
-	A2($elm$json$Json$Decode$field, 'quantity', $elm$json$Json$Decode$int));
-var $author$project$Main$productListDecoder = $elm$json$Json$Decode$list($author$project$Main$productDecoder);
+var $elm$http$Http$emptyBody = _Http_emptyBody;
 var $elm$http$Http$Request = function (a) {
 	return {$: 'Request', a: a};
 };
@@ -6142,20 +6120,33 @@ var $elm$http$Http$request = function (r) {
 		$elm$http$Http$Request(
 			{allowCookiesFromOtherDomains: false, body: r.body, expect: r.expect, headers: r.headers, method: r.method, timeout: r.timeout, tracker: r.tracker, url: r.url}));
 };
+var $elm$http$Http$get = function (r) {
+	return $elm$http$Http$request(
+		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
+};
+var $elm$json$Json$Decode$list = _Json_decodeList;
+var $author$project$Main$Product = F3(
+	function (name, price, quantity) {
+		return {name: name, price: price, quantity: quantity};
+	});
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$json$Json$Decode$float = _Json_decodeFloat;
+var $elm$json$Json$Decode$int = _Json_decodeInt;
+var $elm$json$Json$Decode$map3 = _Json_map3;
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $author$project$Main$productDecoder = A4(
+	$elm$json$Json$Decode$map3,
+	$author$project$Main$Product,
+	A2($elm$json$Json$Decode$field, 'name', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'price', $elm$json$Json$Decode$float),
+	A2($elm$json$Json$Decode$field, 'quantity', $elm$json$Json$Decode$int));
+var $author$project$Main$productListDecoder = $elm$json$Json$Decode$list($author$project$Main$productDecoder);
 var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2(
 		$author$project$Main$Load,
-		$elm$http$Http$request(
+		$elm$http$Http$get(
 			{
-				body: $elm$http$Http$emptyBody,
 				expect: A2($elm$http$Http$expectJson, $author$project$Main$GotRes, $author$project$Main$productListDecoder),
-				headers: _List_fromArray(
-					[
-						A2($elm$http$Http$header, 'Access-Control-Allow-Origin', '')
-					]),
-				method: 'GET',
-				timeout: $elm$core$Maybe$Nothing,
-				tracker: $elm$core$Maybe$Nothing,
 				url: './products.json'
 			}));
 };
@@ -6198,7 +6189,7 @@ var $elm$html$Html$ul = _VirtualDom_node('ul');
 var $author$project$Main$view = function (model) {
 	switch (model.$) {
 		case 'Fail':
-			return $elm$html$Html$text('I was unable to load your book.');
+			return $elm$html$Html$text('I was unable to load cart');
 		case 'Load':
 			return $elm$html$Html$text('Loading...');
 		default:
