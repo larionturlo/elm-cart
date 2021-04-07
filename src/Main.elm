@@ -9,6 +9,8 @@ import Html exposing (ul)
 import Html exposing (li)
 import Html exposing (button)
 import Html.Events exposing (onClick)
+import Html exposing (div)
+import Debug exposing (toString)
 
 
 
@@ -90,7 +92,7 @@ update msg model =
     GotRes result ->
       case result of
         Ok products ->
-          (Succ (Cart.Cart products 0), Cmd.none)
+          (Succ (Cart.Cart products 0 |> Cart.calcTotal), Cmd.none)
 
         Err err ->
           (Fail err, Cmd.none)
@@ -98,7 +100,7 @@ update msg model =
     AddProduct product ->
       case model of
         Succ cart ->
-          (Succ (Cart.addProduct cart product), Cmd.none)
+          (Succ (Cart.addProduct cart product |> Cart.calcTotal ), Cmd.none)
 
         Fail _ ->
           Debug.todo "branch 'Fail _' not implemented"
@@ -109,7 +111,7 @@ update msg model =
     DeleteProduct productName->
       case model of
         Succ cart ->
-          (Succ (Cart.deleteProduct cart productName), Cmd.none)
+          (Succ (Cart.deleteProduct cart productName |> Cart.calcTotal), Cmd.none)
 
         Fail _ ->
           Debug.todo "branch 'Fail _' not implemented"
@@ -148,11 +150,14 @@ view model =
 
 elementCart : Cart.Cart -> Html Msg
 elementCart cart =
-    ul [] (List.map elementProduct cart.products)
+  div []
+    [ ul [] (List.map elementProduct cart.products)
+    , div [] [ text (String.fromFloat cart.total)]
+    ]
 
 elementProduct : Product -> Html Msg
 elementProduct product =
-  li [] [text product.name
+  li [] [text (product.name ++ " price = " ++ String.fromFloat product.price)
     , button [ onClick (DeleteProduct product.name) ] [ text "delete"]
     ]
 

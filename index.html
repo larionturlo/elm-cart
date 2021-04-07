@@ -6174,17 +6174,31 @@ var $elm$core$List$append = F2(
 		}
 	});
 var $author$project$Cart$addProduct = F2(
-	function (model, product) {
+	function (cart, product) {
 		return _Utils_update(
-			model,
+			cart,
 			{
 				products: A2(
 					$elm$core$List$append,
 					_List_fromArray(
 						[product]),
-					model.products)
+					cart.products)
 			});
 	});
+var $author$project$Cart$calcCostProduct = function (product) {
+	return product.price * product.quantity;
+};
+var $elm$core$List$sum = function (numbers) {
+	return A3($elm$core$List$foldl, $elm$core$Basics$add, 0, numbers);
+};
+var $author$project$Cart$calcTotal = function (cart) {
+	return _Utils_update(
+		cart,
+		{
+			total: $elm$core$List$sum(
+				A2($elm$core$List$map, $author$project$Cart$calcCostProduct, cart.products))
+		});
+};
 var $elm$core$List$filter = F2(
 	function (isGood, list) {
 		return A3(
@@ -6202,14 +6216,14 @@ var $author$project$Cart$hasntName = F2(
 		return !_Utils_eq(product.name, productName);
 	});
 var $author$project$Cart$deleteProduct = F2(
-	function (model, productName) {
+	function (cart, productName) {
 		return _Utils_update(
-			model,
+			cart,
 			{
 				products: A2(
 					$elm$core$List$filter,
 					$author$project$Cart$hasntName(productName),
-					model.products)
+					cart.products)
 			});
 	});
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
@@ -6224,7 +6238,8 @@ var $author$project$Main$update = F2(
 					var products = result.a;
 					return _Utils_Tuple2(
 						$author$project$Main$Succ(
-							A2($author$project$Cart$Cart, products, 0)),
+							$author$project$Cart$calcTotal(
+								A2($author$project$Cart$Cart, products, 0))),
 						$elm$core$Platform$Cmd$none);
 				} else {
 					var err = result.a;
@@ -6239,21 +6254,22 @@ var $author$project$Main$update = F2(
 						var cart = model.a;
 						return _Utils_Tuple2(
 							$author$project$Main$Succ(
-								A2($author$project$Cart$addProduct, cart, product)),
+								$author$project$Cart$calcTotal(
+									A2($author$project$Cart$addProduct, cart, product))),
 							$elm$core$Platform$Cmd$none);
 					case 'Fail':
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 104, column: 11},
-								end: {line: 104, column: 21}
+								start: {line: 106, column: 11},
+								end: {line: 106, column: 21}
 							})('branch \'Fail _\' not implemented');
 					default:
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 107, column: 11},
-								end: {line: 107, column: 21}
+								start: {line: 109, column: 11},
+								end: {line: 109, column: 21}
 							})('branch \'Load\' not implemented');
 				}
 			case 'DeleteProduct':
@@ -6263,36 +6279,39 @@ var $author$project$Main$update = F2(
 						var cart = model.a;
 						return _Utils_Tuple2(
 							$author$project$Main$Succ(
-								A2($author$project$Cart$deleteProduct, cart, productName)),
+								$author$project$Cart$calcTotal(
+									A2($author$project$Cart$deleteProduct, cart, productName))),
 							$elm$core$Platform$Cmd$none);
 					case 'Fail':
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 115, column: 11},
-								end: {line: 115, column: 21}
+								start: {line: 117, column: 11},
+								end: {line: 117, column: 21}
 							})('branch \'Fail _\' not implemented');
 					default:
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 118, column: 11},
-								end: {line: 118, column: 21}
+								start: {line: 120, column: 11},
+								end: {line: 120, column: 21}
 							})('branch \'Load\' not implemented');
 				}
 			default:
 				return _Debug_todo(
 					'Main',
 					{
-						start: {line: 121, column: 7},
-						end: {line: 121, column: 17}
+						start: {line: 123, column: 7},
+						end: {line: 123, column: 17}
 					})('branch \'AddQuantity _\' not implemented');
 		}
 	});
+var $elm$html$Html$div = _VirtualDom_node('div');
 var $author$project$Main$DeleteProduct = function (a) {
 	return {$: 'DeleteProduct', a: a};
 };
 var $elm$html$Html$button = _VirtualDom_node('button');
+var $elm$core$String$fromFloat = _String_fromNumber;
 var $elm$html$Html$li = _VirtualDom_node('li');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
@@ -6319,7 +6338,8 @@ var $author$project$Main$elementProduct = function (product) {
 		_List_Nil,
 		_List_fromArray(
 			[
-				$elm$html$Html$text(product.name),
+				$elm$html$Html$text(
+				product.name + (' price = ' + $elm$core$String$fromFloat(product.price))),
 				A2(
 				$elm$html$Html$button,
 				_List_fromArray(
@@ -6336,9 +6356,23 @@ var $author$project$Main$elementProduct = function (product) {
 var $elm$html$Html$ul = _VirtualDom_node('ul');
 var $author$project$Main$elementCart = function (cart) {
 	return A2(
-		$elm$html$Html$ul,
+		$elm$html$Html$div,
 		_List_Nil,
-		A2($elm$core$List$map, $author$project$Main$elementProduct, cart.products));
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$ul,
+				_List_Nil,
+				A2($elm$core$List$map, $author$project$Main$elementProduct, cart.products)),
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						$elm$core$String$fromFloat(cart.total))
+					]))
+			]));
 };
 var $author$project$Main$errorToString = function (error) {
 	switch (error.$) {

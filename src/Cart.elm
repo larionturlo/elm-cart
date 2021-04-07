@@ -1,6 +1,7 @@
 module Cart exposing (..)
 
 import List
+import List exposing (product)
 
 type alias ProductName = String
 type alias Product =
@@ -15,15 +16,22 @@ type alias Cart =
   }
 
 addProduct : Cart -> Product -> Cart
-addProduct model product =
-    { model | products = List.append [product] model.products }
+addProduct cart product =
+    { cart | products = List.append [product] cart.products }
 
 deleteProduct: Cart -> ProductName -> Cart
-deleteProduct model productName =
-    { model | products = List.filter (hasntName productName) model.products }
+deleteProduct cart productName =
+    { cart | products = List.filter (hasntName productName) cart.products }
 
 hasntName : ProductName -> Product -> Bool
 hasntName productName product =
     product.name /= productName
 
+calcTotal : Cart -> Cart
+calcTotal cart =
+    { cart | total = List.sum (List.map calcCostProduct cart.products)}
+
+calcCostProduct : Product -> Float
+calcCostProduct product =
+  product.price * toFloat product.quantity
 
