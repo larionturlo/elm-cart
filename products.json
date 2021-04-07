@@ -3,5 +3,15 @@
         "name": "Prod1",
         "price": 2.25,
         "quantity": 2
+    },
+    {
+        "name": "Prod2",
+        "price": 2.25,
+        "quantity": 2
+    },
+    {
+        "name": "Prod3",
+        "price": 2.25,
+        "quantity": 2
     }
 ]
