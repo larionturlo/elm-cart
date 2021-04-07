@@ -1,15 +1,16 @@
 module Main exposing (..)
 
 import Browser
-import Html exposing (Html, text, ul, li)
+import Cart exposing (Product)
+import Html exposing (Html, text)
 import Http
 import Json.Decode exposing (..)
+import Html exposing (ul)
+import Html exposing (li)
+import Html exposing (button)
+import Html.Events exposing (onClick)
 
-type alias Product =
-  { name : String
-  , price : Float
-  , quantity : Int
-  }
+
 
 productDecoder : Decoder Product
 productDecoder =
@@ -59,7 +60,7 @@ main =
 type Model
   = Fail Http.Error
   | Load
-  | Succ (List Product)
+  | Succ Cart.Cart
 
 
 init : () -> (Model, Cmd Msg)
@@ -78,18 +79,46 @@ init _ =
 
 type Msg
   = GotRes (Result Http.Error (List Product))
+  | AddProduct Product
+  | DeleteProduct Cart.ProductName
+  | AddQuantity Cart.ProductName
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
-update msg _ =
+update msg model =
   case msg of
     GotRes result ->
       case result of
         Ok products ->
-          (Succ products, Cmd.none)
+          (Succ (Cart.Cart products 0), Cmd.none)
 
         Err err ->
           (Fail err, Cmd.none)
+
+    AddProduct product ->
+      case model of
+        Succ cart ->
+          (Succ (Cart.addProduct cart product), Cmd.none)
+
+        Fail _ ->
+          Debug.todo "branch 'Fail _' not implemented"
+
+        Load ->
+          Debug.todo "branch 'Load' not implemented"
+
+    DeleteProduct productName->
+      case model of
+        Succ cart ->
+          (Succ (Cart.deleteProduct cart productName), Cmd.none)
+
+        Fail _ ->
+          Debug.todo "branch 'Fail _' not implemented"
+
+        Load ->
+          Debug.todo "branch 'Load' not implemented"
+
+    AddQuantity _ ->
+      Debug.todo "branch 'AddQuantity _' not implemented"
 
 
 
@@ -114,9 +143,17 @@ view model =
     Load ->
       text "Loading..."
 
-    Succ products ->
-      ul [] (List.map elementProduct products)
+    Succ cart ->
+      elementCart cart
 
-elementProduct : Product -> Html msg
+elementCart : Cart.Cart -> Html Msg
+elementCart cart =
+    ul [] (List.map elementProduct cart.products)
+
+elementProduct : Product -> Html Msg
 elementProduct product =
-  li [] [ text product.name ]
+  li [] [text product.name
+    , button [ onClick (DeleteProduct product.name) ] [ text "delete"]
+    ]
+
+-- button [ onClick (DeleteProduct product.name) ] [ text "delete"]

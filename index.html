@@ -6125,7 +6125,7 @@ var $elm$http$Http$get = function (r) {
 		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
 };
 var $elm$json$Json$Decode$list = _Json_decodeList;
-var $author$project$Main$Product = F3(
+var $author$project$Cart$Product = F3(
 	function (name, price, quantity) {
 		return {name: name, price: price, quantity: quantity};
 	});
@@ -6136,7 +6136,7 @@ var $elm$json$Json$Decode$map3 = _Json_map3;
 var $elm$json$Json$Decode$string = _Json_decodeString;
 var $author$project$Main$productDecoder = A4(
 	$elm$json$Json$Decode$map3,
-	$author$project$Main$Product,
+	$author$project$Cart$Product,
 	A2($elm$json$Json$Decode$field, 'name', $elm$json$Json$Decode$string),
 	A2($elm$json$Json$Decode$field, 'price', $elm$json$Json$Decode$float),
 	A2($elm$json$Json$Decode$field, 'quantity', $elm$json$Json$Decode$int));
@@ -6155,30 +6155,162 @@ var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $author$project$Main$subscriptions = function (_v0) {
 	return $elm$core$Platform$Sub$none;
 };
+var $author$project$Cart$Cart = F2(
+	function (products, total) {
+		return {products: products, total: total};
+	});
 var $author$project$Main$Fail = function (a) {
 	return {$: 'Fail', a: a};
 };
 var $author$project$Main$Succ = function (a) {
 	return {$: 'Succ', a: a};
 };
-var $elm$core$Platform$Cmd$batch = _Platform_batch;
-var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
-var $author$project$Main$update = F2(
-	function (msg, _v0) {
-		var result = msg.a;
-		if (result.$ === 'Ok') {
-			var products = result.a;
-			return _Utils_Tuple2(
-				$author$project$Main$Succ(products),
-				$elm$core$Platform$Cmd$none);
+var $elm$core$List$append = F2(
+	function (xs, ys) {
+		if (!ys.b) {
+			return xs;
 		} else {
-			var err = result.a;
-			return _Utils_Tuple2(
-				$author$project$Main$Fail(err),
-				$elm$core$Platform$Cmd$none);
+			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
 		}
 	});
+var $author$project$Cart$addProduct = F2(
+	function (model, product) {
+		return _Utils_update(
+			model,
+			{
+				products: A2(
+					$elm$core$List$append,
+					_List_fromArray(
+						[product]),
+					model.products)
+			});
+	});
+var $elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var $elm$core$Basics$neq = _Utils_notEqual;
+var $author$project$Cart$hasntName = F2(
+	function (productName, product) {
+		return !_Utils_eq(product.name, productName);
+	});
+var $author$project$Cart$deleteProduct = F2(
+	function (model, productName) {
+		return _Utils_update(
+			model,
+			{
+				products: A2(
+					$elm$core$List$filter,
+					$author$project$Cart$hasntName(productName),
+					model.products)
+			});
+	});
+var $elm$core$Platform$Cmd$batch = _Platform_batch;
+var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $elm$core$Debug$todo = _Debug_todo;
+var $author$project$Main$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'GotRes':
+				var result = msg.a;
+				if (result.$ === 'Ok') {
+					var products = result.a;
+					return _Utils_Tuple2(
+						$author$project$Main$Succ(
+							A2($author$project$Cart$Cart, products, 0)),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					var err = result.a;
+					return _Utils_Tuple2(
+						$author$project$Main$Fail(err),
+						$elm$core$Platform$Cmd$none);
+				}
+			case 'AddProduct':
+				var product = msg.a;
+				switch (model.$) {
+					case 'Succ':
+						var cart = model.a;
+						return _Utils_Tuple2(
+							$author$project$Main$Succ(
+								A2($author$project$Cart$addProduct, cart, product)),
+							$elm$core$Platform$Cmd$none);
+					case 'Fail':
+						return _Debug_todo(
+							'Main',
+							{
+								start: {line: 104, column: 11},
+								end: {line: 104, column: 21}
+							})('branch \'Fail _\' not implemented');
+					default:
+						return _Debug_todo(
+							'Main',
+							{
+								start: {line: 107, column: 11},
+								end: {line: 107, column: 21}
+							})('branch \'Load\' not implemented');
+				}
+			case 'DeleteProduct':
+				var productName = msg.a;
+				switch (model.$) {
+					case 'Succ':
+						var cart = model.a;
+						return _Utils_Tuple2(
+							$author$project$Main$Succ(
+								A2($author$project$Cart$deleteProduct, cart, productName)),
+							$elm$core$Platform$Cmd$none);
+					case 'Fail':
+						return _Debug_todo(
+							'Main',
+							{
+								start: {line: 115, column: 11},
+								end: {line: 115, column: 21}
+							})('branch \'Fail _\' not implemented');
+					default:
+						return _Debug_todo(
+							'Main',
+							{
+								start: {line: 118, column: 11},
+								end: {line: 118, column: 21}
+							})('branch \'Load\' not implemented');
+				}
+			default:
+				return _Debug_todo(
+					'Main',
+					{
+						start: {line: 121, column: 7},
+						end: {line: 121, column: 17}
+					})('branch \'AddQuantity _\' not implemented');
+		}
+	});
+var $author$project$Main$DeleteProduct = function (a) {
+	return {$: 'DeleteProduct', a: a};
+};
+var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$html$Html$li = _VirtualDom_node('li');
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'click',
+		$elm$json$Json$Decode$succeed(msg));
+};
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $author$project$Main$elementProduct = function (product) {
@@ -6187,8 +6319,26 @@ var $author$project$Main$elementProduct = function (product) {
 		_List_Nil,
 		_List_fromArray(
 			[
-				$elm$html$Html$text(product.name)
+				$elm$html$Html$text(product.name),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onClick(
+						$author$project$Main$DeleteProduct(product.name))
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('delete')
+					]))
 			]));
+};
+var $elm$html$Html$ul = _VirtualDom_node('ul');
+var $author$project$Main$elementCart = function (cart) {
+	return A2(
+		$elm$html$Html$ul,
+		_List_Nil,
+		A2($elm$core$List$map, $author$project$Main$elementProduct, cart.products));
 };
 var $author$project$Main$errorToString = function (error) {
 	switch (error.$) {
@@ -6213,7 +6363,6 @@ var $author$project$Main$errorToString = function (error) {
 			return errorMessage;
 	}
 };
-var $elm$html$Html$ul = _VirtualDom_node('ul');
 var $author$project$Main$view = function (model) {
 	switch (model.$) {
 		case 'Fail':
@@ -6223,11 +6372,8 @@ var $author$project$Main$view = function (model) {
 		case 'Load':
 			return $elm$html$Html$text('Loading...');
 		default:
-			var products = model.a;
-			return A2(
-				$elm$html$Html$ul,
-				_List_Nil,
-				A2($elm$core$List$map, $author$project$Main$elementProduct, products));
+			var cart = model.a;
+			return $author$project$Main$elementCart(cart);
 	}
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
