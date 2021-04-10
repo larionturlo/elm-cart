@@ -4,8 +4,10 @@ import Browser
 import Cart exposing (Product)
 import Http
 import Json.Decode exposing (..)
-import Html exposing (Html, text, div)
+import Html exposing (Html, text, div, a, h1, hr, h2, p)
 import Form
+import Html.Attributes exposing (href)
+import AppCss exposing (padding10)
 
 
 
@@ -151,7 +153,13 @@ view model =
       text "Loading..."
 
     Succ cart form->
-      div [] 
-        [Html.map (\msg-> CartMsg msg) (Cart.view cart)
-        ,Html.map (\msg-> FormMsg msg) (Form.view form)
+      div [ padding10 ] 
+        [ h1 [] [ text "Cart" ]
+        , Html.map (\msg-> CartMsg msg) (Cart.view cart)
+        , hr [] []
+        , h2 [] [ text "Add poduct"]
+        , Html.map (\msg-> FormMsg msg) (Form.view form)
+        , hr [] []
+        , p [] [ text "Created on elm"]
+        , a [ href "https://github.com/larionturlo/elm-cart" ] [ text "Source code"]
         ]
