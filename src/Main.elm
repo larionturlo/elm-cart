@@ -105,7 +105,7 @@ update msg model =
     FormMsg formMsg ->
       case model of
         Succ cart form ->
-          (Succ (addProductFromForm formMsg cart) (Form.update formMsg form), Cmd.none)
+          Debug.log "form" (Succ (addProductFromForm formMsg cart) (Form.update formMsg form), Cmd.none)
 
         Fail _ ->
           Debug.todo "branch 'Fail _' not implemented"
@@ -119,7 +119,7 @@ addProductFromForm formMsg cart =
     Form.AddProduct maybeProduct ->
       case maybeProduct of
         Just product ->
-          Cart.update (Cart.AddProduct product) cart
+          Debug.log product.name Cart.update (Cart.AddProduct product) cart
         Nothing ->
           cart
 

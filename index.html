@@ -6169,6 +6169,7 @@ var $author$project$Main$Succ = F2(
 var $author$project$Cart$AddProduct = function (a) {
 	return {$: 'AddProduct', a: a};
 };
+var $elm$core$Debug$log = _Debug_log;
 var $elm$core$List$append = F2(
 	function (xs, ys) {
 		if (!ys.b) {
@@ -6257,7 +6258,9 @@ var $author$project$Main$addProductFromForm = F2(
 			var maybeProduct = formMsg.a;
 			if (maybeProduct.$ === 'Just') {
 				var product = maybeProduct.a;
-				return A2(
+				return A4(
+					$elm$core$Debug$log,
+					product.name,
 					$author$project$Cart$update,
 					$author$project$Cart$AddProduct(product),
 					cart);
@@ -6408,12 +6411,15 @@ var $author$project$Main$update = F2(
 					case 'Succ':
 						var cart = model.a;
 						var form = model.b;
-						return _Utils_Tuple2(
-							A2(
-								$author$project$Main$Succ,
-								A2($author$project$Main$addProductFromForm, formMsg, cart),
-								A2($author$project$Form$update, formMsg, form)),
-							$elm$core$Platform$Cmd$none);
+						return A2(
+							$elm$core$Debug$log,
+							'form',
+							_Utils_Tuple2(
+								A2(
+									$author$project$Main$Succ,
+									A2($author$project$Main$addProductFromForm, formMsg, cart),
+									A2($author$project$Form$update, formMsg, form)),
+								$elm$core$Platform$Cmd$none));
 					case 'Fail':
 						return _Debug_todo(
 							'Main',
