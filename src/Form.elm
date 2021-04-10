@@ -7,7 +7,7 @@ import Html.Events exposing (onInput, onSubmit)
 import AppCss exposing (errorMsg, inputTextStyle, inputTextStyleWrong)
 
 type Msg
-    = AddProduct (Maybe Product)
+    = SubmitProduct (Maybe Product)
     | Name String
     | Price String
     | Quantity String
@@ -31,10 +31,10 @@ update msg ({product} as model) =
     Name name ->
       { model | product = { product | name = name } }
 
-    AddProduct newProduct ->
+    SubmitProduct newProduct ->
       case newProduct of
         Nothing ->
-          { model | wrongMsg = Just (AddProduct newProduct)}
+          { model | wrongMsg = Just (SubmitProduct newProduct)}
 
         Just _ ->
           { model | product = initProduct }
@@ -75,7 +75,7 @@ view model =
     , viewInputFloat "Price" (String.fromFloat model.product.price) Price []
     , viewInput "number" "Quantity" (String.fromInt model.product.quantity) Quantity []
     , viewValidation model.wrongMsg
-    , viewInputSubmit "Add product" (AddProduct (maybeProduct model.product))
+    , viewInputSubmit "Add product" (SubmitProduct (maybeProduct model.product))
     ]
 
 inputStyle : Maybe Msg -> List (Attribute msg)
@@ -116,7 +116,7 @@ viewErrorMsg msg =
     Price _ ->
       div [ errorMsg ] [ text "Price must containe only number" ]
 
-    AddProduct _ ->
+    SubmitProduct _ ->
       div [ errorMsg ] [ text "All fields must be filled" ]
 
     Name _ ->

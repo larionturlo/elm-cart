@@ -6254,7 +6254,7 @@ var $author$project$Cart$update = F2(
 	});
 var $author$project$Main$addProductFromForm = F2(
 	function (formMsg, cart) {
-		if (formMsg.$ === 'AddProduct') {
+		if (formMsg.$ === 'SubmitProduct') {
 			var maybeProduct = formMsg.a;
 			if (maybeProduct.$ === 'Just') {
 				var product = maybeProduct.a;
@@ -6279,14 +6279,14 @@ var $author$project$Form$initProduct = A3($author$project$Cart$Product, '', 0.0,
 var $author$project$Form$init = A2($author$project$Form$Model, $author$project$Form$initProduct, $elm$core$Maybe$Nothing);
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
-var $author$project$Form$AddProduct = function (a) {
-	return {$: 'AddProduct', a: a};
-};
 var $author$project$Form$Price = function (a) {
 	return {$: 'Price', a: a};
 };
 var $author$project$Form$Quantity = function (a) {
 	return {$: 'Quantity', a: a};
+};
+var $author$project$Form$SubmitProduct = function (a) {
+	return {$: 'SubmitProduct', a: a};
 };
 var $elm$core$String$toFloat = _String_toFloat;
 var $author$project$Form$update = F2(
@@ -6302,14 +6302,14 @@ var $author$project$Form$update = F2(
 							product,
 							{name: name})
 					});
-			case 'AddProduct':
+			case 'SubmitProduct':
 				var newProduct = msg.a;
 				if (newProduct.$ === 'Nothing') {
 					return _Utils_update(
 						model,
 						{
 							wrongMsg: $elm$core$Maybe$Just(
-								$author$project$Form$AddProduct(newProduct))
+								$author$project$Form$SubmitProduct(newProduct))
 						});
 				} else {
 					return _Utils_update(
@@ -6670,7 +6670,7 @@ var $author$project$Form$viewErrorMsg = function (msg) {
 					[
 						$elm$html$Html$text('Price must containe only number')
 					]));
-		case 'AddProduct':
+		case 'SubmitProduct':
 			return A2(
 				$elm$html$Html$div,
 				_List_fromArray(
@@ -6731,7 +6731,7 @@ var $author$project$Form$view = function (model) {
 				A2(
 				$author$project$Form$viewInputSubmit,
 				'Add product',
-				$author$project$Form$AddProduct(
+				$author$project$Form$SubmitProduct(
 					$author$project$Form$maybeProduct(model.product)))
 			]));
 };

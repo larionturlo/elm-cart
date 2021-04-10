@@ -116,7 +116,7 @@ update msg model =
 addProductFromForm : Form.Msg -> Cart.Cart -> Cart.Cart
 addProductFromForm formMsg cart =
   case formMsg of
-    Form.AddProduct maybeProduct ->
+    Form.SubmitProduct maybeProduct ->
       case maybeProduct of
         Just product ->
           Debug.log product.name Cart.update (Cart.AddProduct product) cart
