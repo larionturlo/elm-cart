@@ -1,15 +1,15 @@
 module Main exposing (..)
 
 import Browser
-import Html exposing (Html, text, ul, li)
+import Cart exposing (Product)
 import Http
 import Json.Decode exposing (..)
+import Html exposing (Html, text, div, a, h1, hr, h2, p)
+import Form
+import Html.Attributes exposing (href)
+import AppCss exposing (padding10)
 
-type alias Product =
-  { name : String
-  , price : Float
-  , quantity : Int
-  }
+
 
 productDecoder : Decoder Product
 productDecoder =
@@ -22,7 +22,23 @@ productListDecoder : Decoder (List Product)
 productListDecoder =
     list productDecoder
 
-
+errorToString : Http.Error -> String
+errorToString error =
+    case error of
+        Http.BadUrl url ->
+            "The URL " ++ url ++ " was invalid"
+        Http.Timeout ->
+            "Unable to reach the server, try again"
+        Http.NetworkError ->
+            "Unable to reach the server, check your network connection"
+        Http.BadStatus 500 ->
+            "The server had a problem, try again later"
+        Http.BadStatus 400 ->
+            "Verify your information and try again"
+        Http.BadStatus _ ->
+            "Unknown error"
+        Http.BadBody errorMessage ->
+            errorMessage
 
 -- MAIN
 
@@ -41,9 +57,9 @@ main =
 
 
 type Model
-  = Fail
+  = Fail Http.Error
   | Load
-  | Succ (List Product)
+  | Succ Cart.Cart Form.Model
 
 
 init : () -> (Model, Cmd Msg)
@@ -62,18 +78,56 @@ init _ =
 
 type Msg
   = GotRes (Result Http.Error (List Product))
+  | CartMsg Cart.Msg
+  | FormMsg Form.Msg
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
-update msg _ =
+update msg model =
   case msg of
     GotRes result ->
       case result of
         Ok products ->
-          (Succ products, Cmd.none)
+          (Succ (Cart.Cart products 0 |> Cart.calcTotal) Form.init, Cmd.none)
 
-        Err _ ->
-          (Fail, Cmd.none)
+        Err err ->
+          (Fail err, Cmd.none)
+
+    CartMsg cartmsg->
+      case model of
+        Succ cart form->
+          (Succ (Cart.update cartmsg cart) form, Cmd.none)
+
+        Fail _ ->
+          Debug.todo "branch 'Fail _' not implemented"
+
+        Load ->
+          Debug.todo "branch 'Load' not implemented"
+
+    FormMsg formMsg ->
+      case model of
+        Succ cart form ->
+          Debug.log "form" (Succ (addProductFromForm formMsg cart) (Form.update formMsg form), Cmd.none)
+
+        Fail _ ->
+          Debug.todo "branch 'Fail _' not implemented"
+
+        Load ->
+          Debug.todo "branch 'Load' not implemented"
+
+addProductFromForm : Form.Msg -> Cart.Cart -> Cart.Cart
+addProductFromForm formMsg cart =
+  case formMsg of
+    Form.SubmitProduct maybeProduct ->
+      case maybeProduct of
+        Just product ->
+          Debug.log product.name Cart.update (Cart.AddProduct product) cart
+        Nothing ->
+          cart
+
+    _ ->
+      cart
+
 
 
 
@@ -92,15 +146,20 @@ subscriptions _ =
 view : Model -> Html Msg
 view model =
   case model of
-    Fail ->
-      text "I was unable to load cart"
+    Fail err ->
+      text (errorToString err)
 
     Load ->
       text "Loading..."
 
-    Succ products ->
-      ul [] (List.map elementProduct products)
-
-elementProduct : Product -> Html msg
-elementProduct product =
-  li [] [ text product.name ]
+    Succ cart form->
+      div [ padding10 ] 
+        [ h1 [] [ text "Cart" ]
+        , Html.map (\msg-> CartMsg msg) (Cart.view cart)
+        , hr [] []
+        , h2 [] [ text "Add poduct"]
+        , Html.map (\msg-> FormMsg msg) (Form.view form)
+        , hr [] []
+        , p [] [ text "Created on elm"]
+        , a [ href "https://github.com/larionturlo/elm-cart" ] [ text "Source code"]
+        ]
