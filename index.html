@@ -6170,14 +6170,6 @@ var $author$project$Cart$AddProduct = function (a) {
 	return {$: 'AddProduct', a: a};
 };
 var $elm$core$Debug$log = _Debug_log;
-var $elm$core$List$append = F2(
-	function (xs, ys) {
-		if (!ys.b) {
-			return xs;
-		} else {
-			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
-		}
-	});
 var $author$project$Cart$calcCostProduct = function (product) {
 	return product.price * product.quantity;
 };
@@ -6198,12 +6190,37 @@ var $author$project$Cart$addProduct = F2(
 			_Utils_update(
 				cart,
 				{
-					products: A2(
-						$elm$core$List$append,
-						_List_fromArray(
-							[product]),
-						cart.products)
+					products: A2($elm$core$List$cons, product, cart.products)
 				}));
+	});
+var $author$project$Cart$decrementQuntity = function (quant) {
+	return (quant === 1) ? quant : (quant - 1);
+};
+var $elm$core$Basics$neq = _Utils_notEqual;
+var $author$project$Cart$changeQuantity = F3(
+	function (productName, change, prod) {
+		if (!_Utils_eq(productName, prod.name)) {
+			return prod;
+		} else {
+			if (change.$ === 'Increment') {
+				return _Utils_update(
+					prod,
+					{quantity: prod.quantity + 1});
+			} else {
+				return _Utils_update(
+					prod,
+					{
+						quantity: $author$project$Cart$decrementQuntity(prod.quantity)
+					});
+			}
+		}
+	});
+var $author$project$Cart$calcQuantity = F3(
+	function (products, productName, change) {
+		return A2(
+			$elm$core$List$map,
+			A2($author$project$Cart$changeQuantity, productName, change),
+			products);
 	});
 var $elm$core$List$filter = F2(
 	function (isGood, list) {
@@ -6216,7 +6233,6 @@ var $elm$core$List$filter = F2(
 			_List_Nil,
 			list);
 	});
-var $elm$core$Basics$neq = _Utils_notEqual;
 var $author$project$Cart$hasntName = F2(
 	function (productName, product) {
 		return !_Utils_eq(product.name, productName);
@@ -6233,7 +6249,6 @@ var $author$project$Cart$deleteProduct = F2(
 						cart.products)
 				}));
 	});
-var $elm$core$Debug$todo = _Debug_todo;
 var $author$project$Cart$update = F2(
 	function (msg, cart) {
 		switch (msg.$) {
@@ -6244,12 +6259,14 @@ var $author$project$Cart$update = F2(
 				var productName = msg.a;
 				return A2($author$project$Cart$deleteProduct, cart, productName);
 			default:
-				return _Debug_todo(
-					'Cart',
-					{
-						start: {line: 34, column: 7},
-						end: {line: 34, column: 17}
-					})('branch \'AddQuantity _\' not implemented');
+				var change = msg.a;
+				var productName = msg.b;
+				return $author$project$Cart$calcTotal(
+					_Utils_update(
+						cart,
+						{
+							products: A3($author$project$Cart$calcQuantity, cart.products, productName, change)
+						}));
 		}
 	});
 var $author$project$Main$addProductFromForm = F2(
@@ -6279,6 +6296,7 @@ var $author$project$Form$initProduct = A3($author$project$Cart$Product, '', 0.0,
 var $author$project$Form$init = A2($author$project$Form$Model, $author$project$Form$initProduct, $elm$core$Maybe$Nothing);
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $elm$core$Debug$todo = _Debug_todo;
 var $author$project$Form$Price = function (a) {
 	return {$: 'Price', a: a};
 };
@@ -6314,7 +6332,7 @@ var $author$project$Form$update = F2(
 				} else {
 					return _Utils_update(
 						model,
-						{product: $author$project$Form$initProduct});
+						{product: $author$project$Form$initProduct, wrongMsg: $elm$core$Maybe$Nothing});
 				}
 			case 'Price':
 				var price = msg.a;
@@ -6326,7 +6344,8 @@ var $author$project$Form$update = F2(
 						{
 							product: _Utils_update(
 								product,
-								{price: value})
+								{price: value}),
+							wrongMsg: $elm$core$Maybe$Nothing
 						});
 				} else {
 					return _Utils_update(
@@ -6346,7 +6365,8 @@ var $author$project$Form$update = F2(
 						{
 							product: _Utils_update(
 								product,
-								{quantity: value})
+								{quantity: value}),
+							wrongMsg: $elm$core$Maybe$Nothing
 						});
 				} else {
 					return _Utils_update(
@@ -6472,9 +6492,16 @@ var $elm$html$Html$map = $elm$virtual_dom$VirtualDom$map;
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$core$String$fromFloat = _String_fromNumber;
+var $elm$html$Html$ul = _VirtualDom_node('ul');
+var $author$project$Cart$ChangeQuantity = F2(
+	function (a, b) {
+		return {$: 'ChangeQuantity', a: a, b: b};
+	});
+var $author$project$Cart$Decrement = {$: 'Decrement'};
 var $author$project$Cart$DeleteProduct = function (a) {
 	return {$: 'DeleteProduct', a: a};
 };
+var $author$project$Cart$Increment = {$: 'Increment'};
 var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$html$Html$li = _VirtualDom_node('li');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
@@ -6494,14 +6521,52 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
 };
-var $author$project$Cart$productView = function (product) {
+var $elm$html$Html$span = _VirtualDom_node('span');
+var $author$project$Cart$viewProduct = function (product) {
 	return A2(
 		$elm$html$Html$li,
 		_List_Nil,
 		_List_fromArray(
 			[
 				$elm$html$Html$text(
-				product.name + (' price = ' + $elm$core$String$fromFloat(product.price))),
+				product.name + (' Price: ' + $elm$core$String$fromFloat(product.price))),
+				A2(
+				$elm$html$Html$span,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Quantity'),
+						A2(
+						$elm$html$Html$button,
+						_List_fromArray(
+							[
+								$elm$html$Html$Events$onClick(
+								A2($author$project$Cart$ChangeQuantity, $author$project$Cart$Increment, product.name))
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('+')
+							])),
+						A2(
+						$elm$html$Html$span,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text(
+								$elm$core$String$fromInt(product.quantity))
+							])),
+						A2(
+						$elm$html$Html$button,
+						_List_fromArray(
+							[
+								$elm$html$Html$Events$onClick(
+								A2($author$project$Cart$ChangeQuantity, $author$project$Cart$Decrement, product.name))
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('-')
+							]))
+					])),
 				A2(
 				$elm$html$Html$button,
 				_List_fromArray(
@@ -6515,7 +6580,6 @@ var $author$project$Cart$productView = function (product) {
 					]))
 			]));
 };
-var $elm$html$Html$ul = _VirtualDom_node('ul');
 var $author$project$Cart$view = function (cart) {
 	return A2(
 		$elm$html$Html$div,
@@ -6525,14 +6589,14 @@ var $author$project$Cart$view = function (cart) {
 				A2(
 				$elm$html$Html$ul,
 				_List_Nil,
-				A2($elm$core$List$map, $author$project$Cart$productView, cart.products)),
+				A2($elm$core$List$map, $author$project$Cart$viewProduct, cart.products)),
 				A2(
 				$elm$html$Html$div,
 				_List_Nil,
 				_List_fromArray(
 					[
 						$elm$html$Html$text(
-						$elm$core$String$fromFloat(cart.total))
+						'Total coast: ' + $elm$core$String$fromFloat(cart.total))
 					]))
 			]));
 };
@@ -6546,6 +6610,7 @@ var $author$project$Form$maybeProduct = function (product) {
 	return $author$project$Form$checkProduct(product) ? $elm$core$Maybe$Just(product) : $elm$core$Maybe$Nothing;
 };
 var $elm$html$Html$input = _VirtualDom_node('input');
+var $elm$html$Html$label = _VirtualDom_node('label');
 var $elm$html$Html$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
 };
@@ -6591,36 +6656,62 @@ var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('
 var $author$project$Form$viewInput = F5(
 	function (t, p, v, toMsg, listAttr) {
 		return A2(
-			$elm$html$Html$input,
-			_Utils_ap(
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$type_(t),
-						$elm$html$Html$Attributes$placeholder(p),
-						$elm$html$Html$Attributes$value(v),
-						$elm$html$Html$Events$onInput(toMsg)
-					]),
-				listAttr),
-			_List_Nil);
+			$elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$label,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(p)
+						])),
+					A2(
+					$elm$html$Html$input,
+					_Utils_ap(
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$type_(t),
+								$elm$html$Html$Attributes$placeholder(p),
+								$elm$html$Html$Attributes$value(v),
+								$elm$html$Html$Events$onInput(toMsg)
+							]),
+						listAttr),
+					_List_Nil)
+				]));
 	});
 var $elm$html$Html$Attributes$step = function (n) {
 	return A2($elm$html$Html$Attributes$stringProperty, 'step', n);
 };
 var $author$project$Form$viewInputFloat = F4(
-	function (lable, v, toMsg, listAttr) {
+	function (p, v, toMsg, listAttr) {
 		return A2(
-			$elm$html$Html$input,
-			_Utils_ap(
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$type_('number'),
-						$elm$html$Html$Attributes$step('0.01'),
-						$elm$html$Html$Attributes$placeholder(lable),
-						$elm$html$Html$Attributes$value(v),
-						$elm$html$Html$Events$onInput(toMsg)
-					]),
-				listAttr),
-			_List_Nil);
+			$elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$label,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(p)
+						])),
+					A2(
+					$elm$html$Html$input,
+					_Utils_ap(
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$type_('number'),
+								$elm$html$Html$Attributes$step('0.01'),
+								$elm$html$Html$Attributes$placeholder(p),
+								$elm$html$Html$Attributes$value(v),
+								$elm$html$Html$Events$onInput(toMsg)
+							]),
+						listAttr),
+					_List_Nil)
+				]));
 	});
 var $author$project$Form$viewInputSubmit = F2(
 	function (v, toMsg) {

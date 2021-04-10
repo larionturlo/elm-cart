@@ -5,6 +5,7 @@ import Html exposing (Html, Attribute, input, div, text, button)
 import Html.Attributes exposing (type_, step, placeholder, value)
 import Html.Events exposing (onInput, onClick)
 import AppCss exposing (errorMsg, inputTextStyle, inputTextStyleWrong)
+import Html exposing (label)
 
 type Msg
     = SubmitProduct (Maybe Product)
@@ -37,12 +38,12 @@ update msg ({product} as model) =
           { model | wrongMsg = Just (SubmitProduct newProduct)}
 
         Just _ ->
-          { model | product = initProduct }
+          { model | product = initProduct, wrongMsg = Nothing }
 
     Price price ->
       case (String.toFloat price) of
         Just value ->
-          { model | product = { product | price = value} }
+          { model | product = { product | price = value}, wrongMsg = Nothing }
 
         Nothing ->
           { model | wrongMsg = Just (Price price)}
@@ -50,7 +51,7 @@ update msg ({product} as model) =
     Quantity quantity ->
       case (String.toInt quantity) of
         Just value ->
-          { model | product = { product | quantity = value } }
+          { model | product = { product | quantity = value }, wrongMsg = Nothing }
 
         Nothing ->
           { model | wrongMsg = Just (Quantity quantity)}
@@ -88,7 +89,10 @@ inputStyle msg =
 
 viewInput : String -> String -> String -> (String -> msg) -> List (Attribute msg) -> Html msg
 viewInput t p v toMsg listAttr =
-  input ([ type_ t, placeholder p, value v, onInput toMsg ] ++ listAttr) []
+  div []
+    [ label [] [text p]
+    , input ([ type_ t, placeholder p, value v, onInput toMsg ] ++ listAttr) []
+    ]
 
 viewInputSubmit : String -> msg -> Html msg
 viewInputSubmit v toMsg =
@@ -96,8 +100,11 @@ viewInputSubmit v toMsg =
 
 
 viewInputFloat: String -> String -> (String -> msg) -> List (Attribute msg)  -> Html msg
-viewInputFloat lable v toMsg listAttr =
-  input ([ type_ "number", step "0.01", placeholder lable, value v, onInput toMsg ] ++ listAttr) []
+viewInputFloat p v toMsg listAttr =
+  div []
+    [ label [] [text p]
+    , input ([ type_ "number", step "0.01", placeholder p, value v, onInput toMsg ] ++ listAttr) []
+    ]
 
 
 viewValidation : Maybe Msg -> Html msg
