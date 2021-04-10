@@ -18,3 +18,5 @@ errorMsg : Attribute msg
 errorMsg =
   style "color" "red"
 
+padding10 : Attribute msg
+padding10 = style "padding" "0 10px"

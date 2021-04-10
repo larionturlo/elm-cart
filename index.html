@@ -6184,9 +6184,41 @@ var $author$project$Cart$calcTotal = function (cart) {
 				A2($elm$core$List$map, $author$project$Cart$calcCostProduct, cart.products))
 		});
 };
+var $author$project$Cart$hasName = F2(
+	function (productName, product) {
+		return _Utils_eq(product.name, productName);
+	});
+var $author$project$Cart$checkProductNameExist = F2(
+	function (products, prodName) {
+		return A3(
+			$elm$core$List$foldl,
+			$elm$core$Basics$or,
+			false,
+			A2(
+				$elm$core$List$map,
+				$author$project$Cart$hasName(prodName),
+				products));
+	});
+var $author$project$Cart$changeProduct = F2(
+	function (newProduct, oldProduct) {
+		return A2($author$project$Cart$hasName, newProduct.name, oldProduct) ? _Utils_update(
+			oldProduct,
+			{quantity: newProduct.quantity}) : oldProduct;
+	});
+var $author$project$Cart$updateProduct = F2(
+	function (cart, newProduct) {
+		return _Utils_update(
+			cart,
+			{
+				products: A2(
+					$elm$core$List$map,
+					$author$project$Cart$changeProduct(newProduct),
+					cart.products)
+			});
+	});
 var $author$project$Cart$addProduct = F2(
 	function (cart, product) {
-		return $author$project$Cart$calcTotal(
+		return A2($author$project$Cart$checkProductNameExist, cart.products, product.name) ? A2($author$project$Cart$updateProduct, cart, product) : $author$project$Cart$calcTotal(
 			_Utils_update(
 				cart,
 				{
@@ -6521,6 +6553,9 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
 };
+var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
+var $author$project$AppCss$padding10 = A2($elm$html$Html$Attributes$style, 'padding', '0 10px');
 var $elm$html$Html$span = _VirtualDom_node('span');
 var $author$project$Cart$viewProduct = function (product) {
 	return A2(
@@ -6532,7 +6567,8 @@ var $author$project$Cart$viewProduct = function (product) {
 				product.name + (' Price: ' + $elm$core$String$fromFloat(product.price))),
 				A2(
 				$elm$html$Html$span,
-				_List_Nil,
+				_List_fromArray(
+					[$author$project$AppCss$padding10]),
 				_List_fromArray(
 					[
 						$elm$html$Html$text('Quantity'),
@@ -6662,7 +6698,8 @@ var $author$project$Form$viewInput = F5(
 				[
 					A2(
 					$elm$html$Html$label,
-					_List_Nil,
+					_List_fromArray(
+						[$author$project$AppCss$padding10]),
 					_List_fromArray(
 						[
 							$elm$html$Html$text(p)
@@ -6726,8 +6763,6 @@ var $author$project$Form$viewInputSubmit = F2(
 					$elm$html$Html$text(v)
 				]));
 	});
-var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
-var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $author$project$AppCss$errorMsg = A2($elm$html$Html$Attributes$style, 'color', 'red');
 var $author$project$Form$viewErrorMsg = function (msg) {
 	switch (msg.$) {

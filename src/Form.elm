@@ -1,11 +1,10 @@
 module Form exposing (..)
 
+import AppCss exposing (errorMsg, inputTextStyle, inputTextStyleWrong, padding10)
 import Cart exposing (Product)
-import Html exposing (Html, Attribute, input, div, text, button)
+import Html exposing (Html, Attribute, input, div, text, button, label)
 import Html.Attributes exposing (type_, step, placeholder, value)
 import Html.Events exposing (onInput, onClick)
-import AppCss exposing (errorMsg, inputTextStyle, inputTextStyleWrong)
-import Html exposing (label)
 
 type Msg
     = SubmitProduct (Maybe Product)
@@ -90,7 +89,7 @@ inputStyle msg =
 viewInput : String -> String -> String -> (String -> msg) -> List (Attribute msg) -> Html msg
 viewInput t p v toMsg listAttr =
   div []
-    [ label [] [text p]
+    [ label [padding10] [text p]
     , input ([ type_ t, placeholder p, value v, onInput toMsg ] ++ listAttr) []
     ]
 
