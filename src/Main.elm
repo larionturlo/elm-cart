@@ -2,15 +2,10 @@ module Main exposing (..)
 
 import Browser
 import Cart exposing (Product)
-import Html exposing (Html, text)
 import Http
 import Json.Decode exposing (..)
-import Html exposing (ul)
-import Html exposing (li)
-import Html exposing (button)
-import Html.Events exposing (onClick)
-import Html exposing (div)
-import Debug exposing (toString)
+import Html exposing (Html, text, div)
+import Form
 
 
 
@@ -62,7 +57,7 @@ main =
 type Model
   = Fail Http.Error
   | Load
-  | Succ Cart.Cart
+  | Succ Cart.Cart Form.Model
 
 
 init : () -> (Model, Cmd Msg)
@@ -81,9 +76,8 @@ init _ =
 
 type Msg
   = GotRes (Result Http.Error (List Product))
-  | AddProduct Product
-  | DeleteProduct Cart.ProductName
-  | AddQuantity Cart.ProductName
+  | CartMsg Cart.Msg
+  | FormMsg Form.Msg
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -92,15 +86,15 @@ update msg model =
     GotRes result ->
       case result of
         Ok products ->
-          (Succ (Cart.Cart products 0 |> Cart.calcTotal), Cmd.none)
+          (Succ (Cart.Cart products 0 |> Cart.calcTotal) Form.init, Cmd.none)
 
         Err err ->
           (Fail err, Cmd.none)
 
-    AddProduct product ->
+    CartMsg cartmsg->
       case model of
-        Succ cart ->
-          (Succ (Cart.addProduct cart product |> Cart.calcTotal ), Cmd.none)
+        Succ cart form->
+          (Succ (Cart.update cartmsg cart) form, Cmd.none)
 
         Fail _ ->
           Debug.todo "branch 'Fail _' not implemented"
@@ -108,10 +102,10 @@ update msg model =
         Load ->
           Debug.todo "branch 'Load' not implemented"
 
-    DeleteProduct productName->
+    FormMsg formMsg ->
       case model of
-        Succ cart ->
-          (Succ (Cart.deleteProduct cart productName |> Cart.calcTotal), Cmd.none)
+        Succ cart form ->
+          (Succ (addProductFromForm formMsg cart) (Form.update formMsg form), Cmd.none)
 
         Fail _ ->
           Debug.todo "branch 'Fail _' not implemented"
@@ -119,8 +113,19 @@ update msg model =
         Load ->
           Debug.todo "branch 'Load' not implemented"
 
-    AddQuantity _ ->
-      Debug.todo "branch 'AddQuantity _' not implemented"
+addProductFromForm : Form.Msg -> Cart.Cart -> Cart.Cart
+addProductFromForm formMsg cart =
+  case formMsg of
+    Form.AddProduct maybeProduct ->
+      case maybeProduct of
+        Just product ->
+          Cart.update (Cart.AddProduct product) cart
+        Nothing ->
+          cart
+
+    _ ->
+      cart
+
 
 
 
@@ -145,20 +150,8 @@ view model =
     Load ->
       text "Loading..."
 
-    Succ cart ->
-      elementCart cart
-
-elementCart : Cart.Cart -> Html Msg
-elementCart cart =
-  div []
-    [ ul [] (List.map elementProduct cart.products)
-    , div [] [ text (String.fromFloat cart.total)]
-    ]
-
-elementProduct : Product -> Html Msg
-elementProduct product =
-  li [] [text (product.name ++ " price = " ++ String.fromFloat product.price)
-    , button [ onClick (DeleteProduct product.name) ] [ text "delete"]
-    ]
-
--- button [ onClick (DeleteProduct product.name) ] [ text "delete"]
+    Succ cart form->
+      div [] 
+        [Html.map (\msg-> CartMsg msg) (Cart.view cart)
+        ,Html.map (\msg-> FormMsg msg) (Form.view form)
+        ]

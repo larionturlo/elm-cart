@@ -6162,8 +6162,12 @@ var $author$project$Cart$Cart = F2(
 var $author$project$Main$Fail = function (a) {
 	return {$: 'Fail', a: a};
 };
-var $author$project$Main$Succ = function (a) {
-	return {$: 'Succ', a: a};
+var $author$project$Main$Succ = F2(
+	function (a, b) {
+		return {$: 'Succ', a: a, b: b};
+	});
+var $author$project$Cart$AddProduct = function (a) {
+	return {$: 'AddProduct', a: a};
 };
 var $elm$core$List$append = F2(
 	function (xs, ys) {
@@ -6172,18 +6176,6 @@ var $elm$core$List$append = F2(
 		} else {
 			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
 		}
-	});
-var $author$project$Cart$addProduct = F2(
-	function (cart, product) {
-		return _Utils_update(
-			cart,
-			{
-				products: A2(
-					$elm$core$List$append,
-					_List_fromArray(
-						[product]),
-					cart.products)
-			});
 	});
 var $author$project$Cart$calcCostProduct = function (product) {
 	return product.price * product.quantity;
@@ -6199,6 +6191,19 @@ var $author$project$Cart$calcTotal = function (cart) {
 				A2($elm$core$List$map, $author$project$Cart$calcCostProduct, cart.products))
 		});
 };
+var $author$project$Cart$addProduct = F2(
+	function (cart, product) {
+		return $author$project$Cart$calcTotal(
+			_Utils_update(
+				cart,
+				{
+					products: A2(
+						$elm$core$List$append,
+						_List_fromArray(
+							[product]),
+						cart.products)
+				}));
+	});
 var $elm$core$List$filter = F2(
 	function (isGood, list) {
 		return A3(
@@ -6217,18 +6222,139 @@ var $author$project$Cart$hasntName = F2(
 	});
 var $author$project$Cart$deleteProduct = F2(
 	function (cart, productName) {
-		return _Utils_update(
-			cart,
-			{
-				products: A2(
-					$elm$core$List$filter,
-					$author$project$Cart$hasntName(productName),
-					cart.products)
-			});
+		return $author$project$Cart$calcTotal(
+			_Utils_update(
+				cart,
+				{
+					products: A2(
+						$elm$core$List$filter,
+						$author$project$Cart$hasntName(productName),
+						cart.products)
+				}));
 	});
+var $elm$core$Debug$todo = _Debug_todo;
+var $author$project$Cart$update = F2(
+	function (msg, cart) {
+		switch (msg.$) {
+			case 'AddProduct':
+				var product = msg.a;
+				return A2($author$project$Cart$addProduct, cart, product);
+			case 'DeleteProduct':
+				var productName = msg.a;
+				return A2($author$project$Cart$deleteProduct, cart, productName);
+			default:
+				return _Debug_todo(
+					'Cart',
+					{
+						start: {line: 34, column: 7},
+						end: {line: 34, column: 17}
+					})('branch \'AddQuantity _\' not implemented');
+		}
+	});
+var $author$project$Main$addProductFromForm = F2(
+	function (formMsg, cart) {
+		if (formMsg.$ === 'AddProduct') {
+			var maybeProduct = formMsg.a;
+			if (maybeProduct.$ === 'Just') {
+				var product = maybeProduct.a;
+				return A2(
+					$author$project$Cart$update,
+					$author$project$Cart$AddProduct(product),
+					cart);
+			} else {
+				return cart;
+			}
+		} else {
+			return cart;
+		}
+	});
+var $author$project$Form$Model = F2(
+	function (product, wrongMsg) {
+		return {product: product, wrongMsg: wrongMsg};
+	});
+var $author$project$Form$initProduct = A3($author$project$Cart$Product, '', 0.0, 0);
+var $author$project$Form$init = A2($author$project$Form$Model, $author$project$Form$initProduct, $elm$core$Maybe$Nothing);
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
-var $elm$core$Debug$todo = _Debug_todo;
+var $author$project$Form$AddProduct = function (a) {
+	return {$: 'AddProduct', a: a};
+};
+var $author$project$Form$Price = function (a) {
+	return {$: 'Price', a: a};
+};
+var $author$project$Form$Quantity = function (a) {
+	return {$: 'Quantity', a: a};
+};
+var $elm$core$String$toFloat = _String_toFloat;
+var $author$project$Form$update = F2(
+	function (msg, model) {
+		var product = model.product;
+		switch (msg.$) {
+			case 'Name':
+				var name = msg.a;
+				return _Utils_update(
+					model,
+					{
+						product: _Utils_update(
+							product,
+							{name: name})
+					});
+			case 'AddProduct':
+				var newProduct = msg.a;
+				if (newProduct.$ === 'Nothing') {
+					return _Utils_update(
+						model,
+						{
+							wrongMsg: $elm$core$Maybe$Just(
+								$author$project$Form$AddProduct(newProduct))
+						});
+				} else {
+					return _Utils_update(
+						model,
+						{product: $author$project$Form$initProduct});
+				}
+			case 'Price':
+				var price = msg.a;
+				var _v2 = $elm$core$String$toFloat(price);
+				if (_v2.$ === 'Just') {
+					var value = _v2.a;
+					return _Utils_update(
+						model,
+						{
+							product: _Utils_update(
+								product,
+								{price: value})
+						});
+				} else {
+					return _Utils_update(
+						model,
+						{
+							wrongMsg: $elm$core$Maybe$Just(
+								$author$project$Form$Price(price))
+						});
+				}
+			default:
+				var quantity = msg.a;
+				var _v3 = $elm$core$String$toInt(quantity);
+				if (_v3.$ === 'Just') {
+					var value = _v3.a;
+					return _Utils_update(
+						model,
+						{
+							product: _Utils_update(
+								product,
+								{quantity: value})
+						});
+				} else {
+					return _Utils_update(
+						model,
+						{
+							wrongMsg: $elm$core$Maybe$Just(
+								$author$project$Form$Quantity(quantity))
+						});
+				}
+		}
+	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -6237,9 +6363,11 @@ var $author$project$Main$update = F2(
 				if (result.$ === 'Ok') {
 					var products = result.a;
 					return _Utils_Tuple2(
-						$author$project$Main$Succ(
+						A2(
+							$author$project$Main$Succ,
 							$author$project$Cart$calcTotal(
-								A2($author$project$Cart$Cart, products, 0))),
+								A2($author$project$Cart$Cart, products, 0)),
+							$author$project$Form$init),
 						$elm$core$Platform$Cmd$none);
 				} else {
 					var err = result.a;
@@ -6247,133 +6375,69 @@ var $author$project$Main$update = F2(
 						$author$project$Main$Fail(err),
 						$elm$core$Platform$Cmd$none);
 				}
-			case 'AddProduct':
-				var product = msg.a;
+			case 'CartMsg':
+				var cartmsg = msg.a;
 				switch (model.$) {
 					case 'Succ':
 						var cart = model.a;
+						var form = model.b;
 						return _Utils_Tuple2(
-							$author$project$Main$Succ(
-								$author$project$Cart$calcTotal(
-									A2($author$project$Cart$addProduct, cart, product))),
+							A2(
+								$author$project$Main$Succ,
+								A2($author$project$Cart$update, cartmsg, cart),
+								form),
 							$elm$core$Platform$Cmd$none);
 					case 'Fail':
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 106, column: 11},
-								end: {line: 106, column: 21}
+								start: {line: 100, column: 11},
+								end: {line: 100, column: 21}
 							})('branch \'Fail _\' not implemented');
 					default:
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 109, column: 11},
-								end: {line: 109, column: 21}
-							})('branch \'Load\' not implemented');
-				}
-			case 'DeleteProduct':
-				var productName = msg.a;
-				switch (model.$) {
-					case 'Succ':
-						var cart = model.a;
-						return _Utils_Tuple2(
-							$author$project$Main$Succ(
-								$author$project$Cart$calcTotal(
-									A2($author$project$Cart$deleteProduct, cart, productName))),
-							$elm$core$Platform$Cmd$none);
-					case 'Fail':
-						return _Debug_todo(
-							'Main',
-							{
-								start: {line: 117, column: 11},
-								end: {line: 117, column: 21}
-							})('branch \'Fail _\' not implemented');
-					default:
-						return _Debug_todo(
-							'Main',
-							{
-								start: {line: 120, column: 11},
-								end: {line: 120, column: 21}
+								start: {line: 103, column: 11},
+								end: {line: 103, column: 21}
 							})('branch \'Load\' not implemented');
 				}
 			default:
-				return _Debug_todo(
-					'Main',
-					{
-						start: {line: 123, column: 7},
-						end: {line: 123, column: 17}
-					})('branch \'AddQuantity _\' not implemented');
+				var formMsg = msg.a;
+				switch (model.$) {
+					case 'Succ':
+						var cart = model.a;
+						var form = model.b;
+						return _Utils_Tuple2(
+							A2(
+								$author$project$Main$Succ,
+								A2($author$project$Main$addProductFromForm, formMsg, cart),
+								A2($author$project$Form$update, formMsg, form)),
+							$elm$core$Platform$Cmd$none);
+					case 'Fail':
+						return _Debug_todo(
+							'Main',
+							{
+								start: {line: 111, column: 11},
+								end: {line: 111, column: 21}
+							})('branch \'Fail _\' not implemented');
+					default:
+						return _Debug_todo(
+							'Main',
+							{
+								start: {line: 114, column: 11},
+								end: {line: 114, column: 21}
+							})('branch \'Load\' not implemented');
+				}
 		}
 	});
+var $author$project$Main$CartMsg = function (a) {
+	return {$: 'CartMsg', a: a};
+};
+var $author$project$Main$FormMsg = function (a) {
+	return {$: 'FormMsg', a: a};
+};
 var $elm$html$Html$div = _VirtualDom_node('div');
-var $author$project$Main$DeleteProduct = function (a) {
-	return {$: 'DeleteProduct', a: a};
-};
-var $elm$html$Html$button = _VirtualDom_node('button');
-var $elm$core$String$fromFloat = _String_fromNumber;
-var $elm$html$Html$li = _VirtualDom_node('li');
-var $elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 'Normal', a: a};
-};
-var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
-var $elm$html$Html$Events$on = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$Normal(decoder));
-	});
-var $elm$html$Html$Events$onClick = function (msg) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'click',
-		$elm$json$Json$Decode$succeed(msg));
-};
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
-var $author$project$Main$elementProduct = function (product) {
-	return A2(
-		$elm$html$Html$li,
-		_List_Nil,
-		_List_fromArray(
-			[
-				$elm$html$Html$text(
-				product.name + (' price = ' + $elm$core$String$fromFloat(product.price))),
-				A2(
-				$elm$html$Html$button,
-				_List_fromArray(
-					[
-						$elm$html$Html$Events$onClick(
-						$author$project$Main$DeleteProduct(product.name))
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('delete')
-					]))
-			]));
-};
-var $elm$html$Html$ul = _VirtualDom_node('ul');
-var $author$project$Main$elementCart = function (cart) {
-	return A2(
-		$elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$ul,
-				_List_Nil,
-				A2($elm$core$List$map, $author$project$Main$elementProduct, cart.products)),
-				A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text(
-						$elm$core$String$fromFloat(cart.total))
-					]))
-			]));
-};
 var $author$project$Main$errorToString = function (error) {
 	switch (error.$) {
 		case 'BadUrl':
@@ -6397,6 +6461,274 @@ var $author$project$Main$errorToString = function (error) {
 			return errorMessage;
 	}
 };
+var $elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
+var $elm$html$Html$map = $elm$virtual_dom$VirtualDom$map;
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$core$String$fromFloat = _String_fromNumber;
+var $author$project$Cart$DeleteProduct = function (a) {
+	return {$: 'DeleteProduct', a: a};
+};
+var $elm$html$Html$button = _VirtualDom_node('button');
+var $elm$html$Html$li = _VirtualDom_node('li');
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'click',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $author$project$Cart$productView = function (product) {
+	return A2(
+		$elm$html$Html$li,
+		_List_Nil,
+		_List_fromArray(
+			[
+				$elm$html$Html$text(
+				product.name + (' price = ' + $elm$core$String$fromFloat(product.price))),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onClick(
+						$author$project$Cart$DeleteProduct(product.name))
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('delete')
+					]))
+			]));
+};
+var $elm$html$Html$ul = _VirtualDom_node('ul');
+var $author$project$Cart$view = function (cart) {
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$ul,
+				_List_Nil,
+				A2($elm$core$List$map, $author$project$Cart$productView, cart.products)),
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						$elm$core$String$fromFloat(cart.total))
+					]))
+			]));
+};
+var $author$project$Form$Name = function (a) {
+	return {$: 'Name', a: a};
+};
+var $author$project$Form$checkProduct = function (product) {
+	return (!_Utils_eq(product.name, $author$project$Form$initProduct.name)) && ((!_Utils_eq(product.price, $author$project$Form$initProduct.price)) && (!_Utils_eq(product.quantity, $author$project$Form$initProduct.quantity)));
+};
+var $author$project$Form$maybeProduct = function (product) {
+	return $author$project$Form$checkProduct(product) ? $elm$core$Maybe$Just(product) : $elm$core$Maybe$Nothing;
+};
+var $elm$html$Html$input = _VirtualDom_node('input');
+var $elm$html$Html$Events$alwaysStop = function (x) {
+	return _Utils_Tuple2(x, true);
+};
+var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
+	return {$: 'MayStopPropagation', a: a};
+};
+var $elm$html$Html$Events$stopPropagationOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $elm$html$Html$Events$targetValue = A2(
+	$elm$json$Json$Decode$at,
+	_List_fromArray(
+		['target', 'value']),
+	$elm$json$Json$Decode$string);
+var $elm$html$Html$Events$onInput = function (tagger) {
+	return A2(
+		$elm$html$Html$Events$stopPropagationOn,
+		'input',
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$html$Html$Events$alwaysStop,
+			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
+};
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$string(string));
+	});
+var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
+var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
+var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
+var $author$project$Form$viewInput = F5(
+	function (t, p, v, toMsg, listAttr) {
+		return A2(
+			$elm$html$Html$input,
+			_Utils_ap(
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$type_(t),
+						$elm$html$Html$Attributes$placeholder(p),
+						$elm$html$Html$Attributes$value(v),
+						$elm$html$Html$Events$onInput(toMsg)
+					]),
+				listAttr),
+			_List_Nil);
+	});
+var $elm$html$Html$Attributes$step = function (n) {
+	return A2($elm$html$Html$Attributes$stringProperty, 'step', n);
+};
+var $author$project$Form$viewInputFloat = F4(
+	function (lable, v, toMsg, listAttr) {
+		return A2(
+			$elm$html$Html$input,
+			_Utils_ap(
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$type_('number'),
+						$elm$html$Html$Attributes$step('0.01'),
+						$elm$html$Html$Attributes$placeholder(lable),
+						$elm$html$Html$Attributes$value(v),
+						$elm$html$Html$Events$onInput(toMsg)
+					]),
+				listAttr),
+			_List_Nil);
+	});
+var $elm$html$Html$Events$alwaysPreventDefault = function (msg) {
+	return _Utils_Tuple2(msg, true);
+};
+var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
+	return {$: 'MayPreventDefault', a: a};
+};
+var $elm$html$Html$Events$preventDefaultOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
+	});
+var $elm$html$Html$Events$onSubmit = function (msg) {
+	return A2(
+		$elm$html$Html$Events$preventDefaultOn,
+		'submit',
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$html$Html$Events$alwaysPreventDefault,
+			$elm$json$Json$Decode$succeed(msg)));
+};
+var $author$project$Form$viewInputSubmit = F2(
+	function (v, toMsg) {
+		return A2(
+			$elm$html$Html$input,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$type_('submit'),
+					$elm$html$Html$Attributes$value(v),
+					$elm$html$Html$Events$onSubmit(toMsg)
+				]),
+			_List_Nil);
+	});
+var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
+var $author$project$AppCss$errorMsg = A2($elm$html$Html$Attributes$style, 'color', 'red');
+var $author$project$Form$viewErrorMsg = function (msg) {
+	switch (msg.$) {
+		case 'Price':
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[$author$project$AppCss$errorMsg]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Price must containe only number')
+					]));
+		case 'AddProduct':
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[$author$project$AppCss$errorMsg]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('All fields must be filled')
+					]));
+		case 'Name':
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[$author$project$AppCss$errorMsg]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Name must be filled')
+					]));
+		default:
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[$author$project$AppCss$errorMsg]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Quantity must containe only number')
+					]));
+	}
+};
+var $author$project$Form$viewValidation = function (msg) {
+	if (msg.$ === 'Nothing') {
+		return A2($elm$html$Html$div, _List_Nil, _List_Nil);
+	} else {
+		var wrongMsg = msg.a;
+		return $author$project$Form$viewErrorMsg(wrongMsg);
+	}
+};
+var $author$project$Form$view = function (model) {
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A5($author$project$Form$viewInput, 'text', 'Name', model.product.name, $author$project$Form$Name, _List_Nil),
+				A4(
+				$author$project$Form$viewInputFloat,
+				'Price',
+				$elm$core$String$fromFloat(model.product.price),
+				$author$project$Form$Price,
+				_List_Nil),
+				A5(
+				$author$project$Form$viewInput,
+				'number',
+				'Quantity',
+				$elm$core$String$fromInt(model.product.quantity),
+				$author$project$Form$Quantity,
+				_List_Nil),
+				$author$project$Form$viewValidation(model.wrongMsg),
+				A2(
+				$author$project$Form$viewInputSubmit,
+				'Add product',
+				$author$project$Form$AddProduct(
+					$author$project$Form$maybeProduct(model.product)))
+			]));
+};
 var $author$project$Main$view = function (model) {
 	switch (model.$) {
 		case 'Fail':
@@ -6407,7 +6739,25 @@ var $author$project$Main$view = function (model) {
 			return $elm$html$Html$text('Loading...');
 		default:
 			var cart = model.a;
-			return $author$project$Main$elementCart(cart);
+			var form = model.b;
+			return A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$map,
+						function (msg) {
+							return $author$project$Main$CartMsg(msg);
+						},
+						$author$project$Cart$view(cart)),
+						A2(
+						$elm$html$Html$map,
+						function (msg) {
+							return $author$project$Main$FormMsg(msg);
+						},
+						$author$project$Form$view(form))
+					]));
 	}
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
