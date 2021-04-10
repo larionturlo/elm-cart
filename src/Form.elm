@@ -1,9 +1,9 @@
 module Form exposing (..)
 
 import Cart exposing (Product)
-import Html exposing (Html, Attribute, input, div, text)
-import Html.Attributes exposing (type_, step, placeholder, value, style)
-import Html.Events exposing (onInput, onSubmit)
+import Html exposing (Html, Attribute, input, div, text, button)
+import Html.Attributes exposing (type_, step, placeholder, value)
+import Html.Events exposing (onInput, onClick)
 import AppCss exposing (errorMsg, inputTextStyle, inputTextStyleWrong)
 
 type Msg
@@ -92,7 +92,7 @@ viewInput t p v toMsg listAttr =
 
 viewInputSubmit : String -> msg -> Html msg
 viewInputSubmit v toMsg =
-  input [ type_ "submit", value v, onSubmit toMsg ] []
+  button [ onClick toMsg ] [ text v ]
 
 
 viewInputFloat: String -> String -> (String -> msg) -> List (Attribute msg)  -> Html msg

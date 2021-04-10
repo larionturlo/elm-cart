@@ -6622,39 +6622,18 @@ var $author$project$Form$viewInputFloat = F4(
 				listAttr),
 			_List_Nil);
 	});
-var $elm$html$Html$Events$alwaysPreventDefault = function (msg) {
-	return _Utils_Tuple2(msg, true);
-};
-var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
-	return {$: 'MayPreventDefault', a: a};
-};
-var $elm$html$Html$Events$preventDefaultOn = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
-	});
-var $elm$html$Html$Events$onSubmit = function (msg) {
-	return A2(
-		$elm$html$Html$Events$preventDefaultOn,
-		'submit',
-		A2(
-			$elm$json$Json$Decode$map,
-			$elm$html$Html$Events$alwaysPreventDefault,
-			$elm$json$Json$Decode$succeed(msg)));
-};
 var $author$project$Form$viewInputSubmit = F2(
 	function (v, toMsg) {
 		return A2(
-			$elm$html$Html$input,
+			$elm$html$Html$button,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$type_('submit'),
-					$elm$html$Html$Attributes$value(v),
-					$elm$html$Html$Events$onSubmit(toMsg)
+					$elm$html$Html$Events$onClick(toMsg)
 				]),
-			_List_Nil);
+			_List_fromArray(
+				[
+					$elm$html$Html$text(v)
+				]));
 	});
 var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
