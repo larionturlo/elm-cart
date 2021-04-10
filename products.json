@@ -1,17 +1,17 @@
 [
     {
         "name": "Prod1",
-        "price": 10.0,
+        "price": 10.25,
         "quantity": 1
     },
     {
         "name": "Prod2",
-        "price": 10.0,
+        "price": 10.75,
         "quantity": 2
     },
     {
         "name": "Prod3",
-        "price": 10.0,
+        "price": 10.90,
         "quantity": 3
     }
 ]

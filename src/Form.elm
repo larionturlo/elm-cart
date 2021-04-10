@@ -95,13 +95,13 @@ viewInput t p v toMsg listAttr =
 
 viewInputSubmit : String -> msg -> Html msg
 viewInputSubmit v toMsg =
-  button [ onClick toMsg ] [ text v ]
+  button [ onClick toMsg, padding10 ] [ text v ]
 
 
 viewInputFloat: String -> String -> (String -> msg) -> List (Attribute msg)  -> Html msg
 viewInputFloat p v toMsg listAttr =
   div []
-    [ label [] [text p]
+    [ label [padding10] [text p]
     , input ([ type_ "number", step "0.01", placeholder p, value v, onInput toMsg ] ++ listAttr) []
     ]
 
@@ -120,16 +120,16 @@ viewErrorMsg : Msg -> Html msg
 viewErrorMsg msg =
   case msg of
     Price _ ->
-      div [ errorMsg ] [ text "Price must containe only number" ]
+      div [ errorMsg, padding10 ] [ text "Price must containe only number" ]
 
     SubmitProduct _ ->
-      div [ errorMsg ] [ text "All fields must be filled" ]
+      div [ errorMsg, padding10 ] [ text "All fields must be filled" ]
 
     Name _ ->
-      div [ errorMsg ] [ text "Name must be filled" ]
+      div [ errorMsg, padding10 ] [ text "Name must be filled" ]
 
     Quantity _ ->
-      div [ errorMsg ] [ text "Quantity must containe only number" ]
+      div [ errorMsg, padding10 ] [ text "Quantity must containe only number" ]
 
 
 

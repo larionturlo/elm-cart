@@ -49,12 +49,12 @@ viewProduct : Product -> Html Msg
 viewProduct product =
   li [] [text (product.name ++ " Price: " ++ String.fromFloat product.price)
     , span [ padding10 ]
-      [ text "Quantity"
+      [ text "Quantity "
       , button [ onClick (ChangeQuantity Increment product.name) ][ text "+"]
-      , span [] [ text (String.fromInt product.quantity) ]
+      , span [ padding10 ] [ text (String.fromInt product.quantity) ]
       , button [ onClick (ChangeQuantity Decrement product.name) ][ text "-"]
       ]
-    , button [ onClick (DeleteProduct product.name) ] [ text "delete"]
+    , button [ onClick (DeleteProduct product.name), padding10 ] [ text "delete"]
     ]
 
 addProduct : Cart -> Product -> Cart
