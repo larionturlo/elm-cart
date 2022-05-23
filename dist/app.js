@@ -1,17 +1,3 @@
-<!DOCTYPE HTML>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Main</title>
-  <style>body { padding: 0; margin: 0; }</style>
-</head>
-
-<body>
-
-<pre id="elm"></pre>
-
-<script>
-try {
 (function(scope){
 'use strict';
 
@@ -6150,10 +6136,12 @@ var $author$project$Main$init = function (_v0) {
 				url: './products.json'
 			}));
 };
-var $elm$core$Platform$Sub$batch = _Platform_batch;
-var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
+var $author$project$Main$Version = function (a) {
+	return {$: 'Version', a: a};
+};
+var $author$project$Main$getVersion = _Platform_incomingPort('getVersion', $elm$json$Json$Decode$string);
 var $author$project$Main$subscriptions = function (_v0) {
-	return $elm$core$Platform$Sub$none;
+	return $author$project$Main$getVersion($author$project$Main$Version);
 };
 var $author$project$Cart$Cart = F2(
 	function (products, total) {
@@ -6162,9 +6150,9 @@ var $author$project$Cart$Cart = F2(
 var $author$project$Main$Fail = function (a) {
 	return {$: 'Fail', a: a};
 };
-var $author$project$Main$Succ = F2(
-	function (a, b) {
-		return {$: 'Succ', a: a, b: b};
+var $author$project$Main$Succ = F3(
+	function (a, b, c) {
+		return {$: 'Succ', a: a, b: b, c: c};
 	});
 var $author$project$Cart$AddProduct = function (a) {
 	return {$: 'AddProduct', a: a};
@@ -6418,11 +6406,12 @@ var $author$project$Main$update = F2(
 				if (result.$ === 'Ok') {
 					var products = result.a;
 					return _Utils_Tuple2(
-						A2(
+						A3(
 							$author$project$Main$Succ,
 							$author$project$Cart$calcTotal(
 								A2($author$project$Cart$Cart, products, 0)),
-							$author$project$Form$init),
+							$author$project$Form$init,
+							'--'),
 						$elm$core$Platform$Cmd$none);
 				} else {
 					var err = result.a;
@@ -6436,56 +6425,79 @@ var $author$project$Main$update = F2(
 					case 'Succ':
 						var cart = model.a;
 						var form = model.b;
+						var v = model.c;
 						return _Utils_Tuple2(
-							A2(
+							A3(
 								$author$project$Main$Succ,
 								A2($author$project$Cart$update, cartmsg, cart),
-								form),
+								form,
+								v),
 							$elm$core$Platform$Cmd$none);
 					case 'Fail':
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 102, column: 11},
-								end: {line: 102, column: 21}
+								start: {line: 105, column: 11},
+								end: {line: 105, column: 21}
 							})('branch \'Fail _\' not implemented');
 					default:
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 105, column: 11},
-								end: {line: 105, column: 21}
+								start: {line: 108, column: 11},
+								end: {line: 108, column: 21}
 							})('branch \'Load\' not implemented');
 				}
-			default:
+			case 'FormMsg':
 				var formMsg = msg.a;
 				switch (model.$) {
 					case 'Succ':
 						var cart = model.a;
 						var form = model.b;
+						var v = model.c;
 						return A2(
 							$elm$core$Debug$log,
 							'form',
 							_Utils_Tuple2(
-								A2(
+								A3(
 									$author$project$Main$Succ,
 									A2($author$project$Main$addProductFromForm, formMsg, cart),
-									A2($author$project$Form$update, formMsg, form)),
+									A2($author$project$Form$update, formMsg, form),
+									v),
 								$elm$core$Platform$Cmd$none));
 					case 'Fail':
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 113, column: 11},
-								end: {line: 113, column: 21}
+								start: {line: 116, column: 11},
+								end: {line: 116, column: 21}
 							})('branch \'Fail _\' not implemented');
 					default:
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 116, column: 11},
-								end: {line: 116, column: 21}
+								start: {line: 119, column: 11},
+								end: {line: 119, column: 21}
 							})('branch \'Load\' not implemented');
+				}
+			default:
+				var vn = msg.a;
+				if (model.$ === 'Succ') {
+					var cart = model.a;
+					var form = model.b;
+					return A2(
+						$elm$core$Debug$log,
+						'form',
+						_Utils_Tuple2(
+							A3($author$project$Main$Succ, cart, form, vn),
+							$elm$core$Platform$Cmd$none));
+				} else {
+					return _Debug_todo(
+						'Main',
+						{
+							start: {line: 126, column: 11},
+							end: {line: 126, column: 21}
+						})('branch not implemented');
 				}
 		}
 	});
@@ -6864,6 +6876,7 @@ var $author$project$Main$view = function (model) {
 		default:
 			var cart = model.a;
 			var form = model.b;
+			var v = model.c;
 			return A2(
 				$elm$html$Html$div,
 				_List_fromArray(
@@ -6903,7 +6916,7 @@ var $author$project$Main$view = function (model) {
 						_List_Nil,
 						_List_fromArray(
 							[
-								$elm$html$Html$text('Created on elm')
+								$elm$html$Html$text('Created on elm and tauri:' + v)
 							])),
 						A2(
 						$elm$html$Html$a,
@@ -6922,21 +6935,3 @@ var $author$project$Main$main = $elm$browser$Browser$element(
 	{init: $author$project$Main$init, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	$elm$json$Json$Decode$succeed(_Utils_Tuple0))(0)}});}(this));
-
-  var app = Elm.Main.init({ node: document.getElementById("elm") });
-}
-catch (e)
-{
-  // display initialization errors (e.g. bad flags, infinite recursion)
-  var header = document.createElement("h1");
-  header.style.fontFamily = "monospace";
-  header.innerText = "Initialization Error";
-  var pre = document.getElementById("elm");
-  document.body.insertBefore(header, pre);
-  pre.innerText = e;
-  throw e;
-}
-</script>
-
-</body>
-</html>

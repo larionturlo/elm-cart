@@ -1,0 +1,29 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Main</title>
+    <script src="app.js"></script>
+</head>
+
+<body>
+    <div id="myapp"></div>
+    <script>
+        var t = window.__TAURI__
+        var appElm = Elm.Main.init({
+            node: document.getElementById('myapp')
+        });
+
+        if (t) {
+            t.app.getTauriVersion().then((value) => {
+                appElm.ports.getVersion.send(value)
+            })
+        }else {
+            //alert(t)
+            alert(Object.keys(window.self).join("||"))
+            appElm.ports.getVersion.send('-')
+        }
+    </script>
+</body>
+
+</html>

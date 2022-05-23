@@ -1,4 +1,4 @@
-module Main exposing (..)
+port module Main exposing (..)
 
 import Browser
 import Cart exposing (Product)
@@ -51,7 +51,9 @@ main =
     , view = view
     }
 
+-- PORTS
 
+port getVersion : (String -> msg) -> Sub msg
 
 -- MODEL
 
@@ -59,7 +61,7 @@ main =
 type Model
   = Fail Http.Error
   | Load
-  | Succ Cart.Cart Form.Model
+  | Succ Cart.Cart Form.Model String
 
 
 init : () -> (Model, Cmd Msg)
@@ -80,6 +82,7 @@ type Msg
   = GotRes (Result Http.Error (List Product))
   | CartMsg Cart.Msg
   | FormMsg Form.Msg
+  | Version String
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -88,15 +91,15 @@ update msg model =
     GotRes result ->
       case result of
         Ok products ->
-          (Succ (Cart.Cart products 0 |> Cart.calcTotal) Form.init, Cmd.none)
+          (Succ (Cart.Cart products 0 |> Cart.calcTotal) Form.init "--", Cmd.none)
 
         Err err ->
           (Fail err, Cmd.none)
 
     CartMsg cartmsg->
       case model of
-        Succ cart form->
-          (Succ (Cart.update cartmsg cart) form, Cmd.none)
+        Succ cart form v->
+          (Succ (Cart.update cartmsg cart) form v, Cmd.none)
 
         Fail _ ->
           Debug.todo "branch 'Fail _' not implemented"
@@ -106,14 +109,22 @@ update msg model =
 
     FormMsg formMsg ->
       case model of
-        Succ cart form ->
-          Debug.log "form" (Succ (addProductFromForm formMsg cart) (Form.update formMsg form), Cmd.none)
+        Succ cart form v ->
+          Debug.log "form" (Succ (addProductFromForm formMsg cart) (Form.update formMsg form) v, Cmd.none) 
 
         Fail _ ->
           Debug.todo "branch 'Fail _' not implemented"
 
         Load ->
           Debug.todo "branch 'Load' not implemented"
+    Version vn ->
+      case model of
+        Succ cart form _ ->
+          Debug.log "form" (Succ cart form vn, Cmd.none)
+
+        _ ->
+          Debug.todo "branch not implemented"
+
 
 addProductFromForm : Form.Msg -> Cart.Cart -> Cart.Cart
 addProductFromForm formMsg cart =
@@ -136,7 +147,7 @@ addProductFromForm formMsg cart =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-  Sub.none
+  getVersion Version
 
 
 
@@ -152,7 +163,7 @@ view model =
     Load ->
       text "Loading..."
 
-    Succ cart form->
+    Succ cart form v->
       div [ padding10 ] 
         [ h1 [] [ text "Cart" ]
         , Html.map (\msg-> CartMsg msg) (Cart.view cart)
@@ -160,6 +171,6 @@ view model =
         , h2 [] [ text "Add poduct"]
         , Html.map (\msg-> FormMsg msg) (Form.view form)
         , hr [] []
-        , p [] [ text "Created on elm"]
+        , p [] [ text ("Created on elm and tauri:" ++ v)]
         , a [ href "https://github.com/larionturlo/elm-cart" ] [ text "Source code"]
         ]
